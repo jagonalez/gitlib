@@ -370,7 +370,7 @@ gatherFrom' size scatter = do
 lgSourceTreeEntries
     :: (MonadLg m, HasLgRepo m)
     => Tree
-    -> Producer m (Git.TreeFilePath, TreeEntry)
+    -> ConduitT i (Git.TreeFilePath, TreeEntry) m ()
 lgSourceTreeEntries (LgTree Nothing) = return ()
 lgSourceTreeEntries (LgTree (Just tree)) = gatherFrom' 16 $ \queue -> do
     liftIO $ withForeignPtr tree $ \tr -> do
@@ -707,7 +707,7 @@ lgForEachObject odbPtr f payload =
 
 lgSourceObjects :: (MonadLg m, HasLgRepo m)
                 => Maybe CommitOid -> CommitOid -> Bool
-                -> Producer m ObjectOid
+                -> ConduitT i (Git.ObjectOid LgRepo) m ()
 lgSourceObjects mhave need alsoTrees = do
     repo   <- lift getRepository
     walker <- liftIO $ alloca $ \pptr -> do
